@@ -12,7 +12,7 @@ const dbconnection = createPool(
         password : e.DBPWD,
         database : e.DBNAME,
         multipleStatements : true,
-        connectionLimit : 20
+        connectionLimit : 30
     }
 )
 
