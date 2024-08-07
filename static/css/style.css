@@ -1,0 +1,12 @@
+*,
+::after,
+::before{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:is(h1, h2, h3, h4){
+    text-align: center;
+    color: burlywood;
+}
