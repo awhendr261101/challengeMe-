@@ -121,6 +121,52 @@ app.delete('/User/:id', (req, res) => {
     }
 })
 
+// products endpoints
+app.get('/products', (req, res) => {
+    try {
+        db.query('SELECT * FROM Products', (err, body) =>{
+            if(err) throw new Error(err)
+            res.status(200).json(body)
+        })
+    } catch (err) {
+        res.json(
+            {
+                message : err.message
+            }
+        )
+    }
+})
+
+app.get('/addProduct', (req, res) =>{
+    res.status(200).sendFile(path.resolve('./static/html/register.html'))
+})
+
+app.post('/addProduct', bodyParser.json(),(req, res) => {
+
+    const { name, quantity, price, url, user } = req.body;
+    const priceInt = parseFloat(price);
+//     prodName VARCHAR(15),
+// prodQuantity INT,
+// prodPrice DECIMAL(9,2),
+// prodURL TEXT,
+// userID INT,
+
+    try {
+        db.query(`
+        INSERT INTO Products (prodName, prodQuantity, prodPrice, prodURL,userID)
+        VALUES ('${name}', ${quantity} ,${price}, '${url}', ${user})
+        `, (err, body) => {
+            if (err) throw new Error(err)
+            console.log('Product registered:', req.body);
+        });
+        console.log('Product registered:', req.body);
+        res.status(201).json({ message: 'Product registered successfully' });
+    } catch (err) {
+        console.error('Error registering product:', err.message);
+        res.status(500).json({ message: err.message });
+    }
+})
+
 
 app.listen(port, ()=>{
     console.log(`Server running on port ${port}`)
