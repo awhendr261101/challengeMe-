@@ -150,8 +150,8 @@ app.post('/addProduct', bodyParser.json(),(req, res) => {
 
     try {
         db.query(`
-        INSERT INTO Products (prodName, prodQuantity, prodPrice, prodURL,userID)
-        VALUES ('${name}', ${quantity} ,${price}, '${url}', ${user})
+        INSERT INTO Products (prodName, prodQuantity, prodPrice, prodURL , userID)
+        VALUES ('${name}', ${quantity} ,${price}, '${url}', '${user}')
         `, (err, body) => {
             if (err) throw new Error(err)
             console.log('Product registered:', req.body);
