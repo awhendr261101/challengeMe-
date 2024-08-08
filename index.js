@@ -1,7 +1,7 @@
 import express, { Router } from 'express';
 import path from 'path';
 
-// import { User } from './obs/index.js'
+import bodyParser from 'body-parser';
 
 
 import { dbconnection } from './config/index.js';
@@ -16,7 +16,7 @@ const router = express.Router();
 const port = process.env.PORT || 5000
 
 // middleware 
-app.use(router, express.static('./static'), express.urlencoded({extended: true}))
+app.use(router, express.static('./static'), express.urlencoded({extended: true}) )
 
 // endpoints
 app.get('/', (req, res) =>{
@@ -45,7 +45,7 @@ app.get('/Register', (req, res) =>{
 })
 
 
-app.post('/register',(req, res) => {
+app.post('/register', bodyParser.json(),(req, res) => {
     const { firstname, lastname, age, email, password } = req.body;
 
     const ageInt = parseInt(age, 10);
@@ -53,8 +53,11 @@ app.post('/register',(req, res) => {
     try {
         db.query(`
         INSERT INTO Users (userName, userSurname, userAge, userEmail, userPwd)
-        ALUES ('${firstname}, '${lastname}',${ageInt} , '${email}', '${password}')
-        `);
+        VALUES ('${firstname}', '${lastname}',${ageInt} , '${email}', '${password}')
+        `, (err, body) => {
+            if (err) throw new Error(err)
+            console.log('User registered:', req.body);
+        });
         console.log('User registered:', req.body);
         res.status(201).json({ message: 'User registered successfully' });
     } catch (err) {
@@ -77,18 +80,23 @@ app.get('/User/:id',(req, res) => {
     }
 });
 
-app.patch('/User/:id',(req, res) => {
+app.patch('/User/:id', bodyParser.json(), (req, res) => {
     const { id } = req.params;
     const { firstname, lastname, age, email, password } = req.body;
 
-    const ageInt = parseInt(age, 10);
+    const ageInt = parseInt(age);
+    const intID = parseInt(id);
 
     try {
+
         db.query(`
         UPDATE Users
-        SET userName='${firstname}', userSurname='${lastname}', userAge=${ageInt}, userEmail='${email}', userPwd='${password}'
-        WHERE userId=${id}
-        `);
+        SET userName ='${firstname}', userSurname='${lastname}', userAge=2, userEmail='${email}', userPwd='${password}'
+        WHERE userID= ${intID}
+        `, (err, body) => {
+            if (err) throw new Error(err.message)
+            console.log('User registered:', req.body);
+        });
         console.log('User updated:', req.body);
         res.status(200).json({ message: 'User updated successfully' });
     } catch (err) {
@@ -99,13 +107,62 @@ app.patch('/User/:id',(req, res) => {
 
 app.delete('/User/:id', (req, res) => {
     const { id } = req.params;
-    const { userId } = req.body
+
+    const intID = parseInt(id);
     try {
-        db.query(`DELETE FROM Users WHERE userId=${userId}`);
+
+        db.query(`DELETE FROM Users WHERE userID= ${intID}`
+        );
         console.log('User deleted:', id);
         res.status(200).json({ message: 'User deleted successfully' });
     } catch (err) {
         console.error('ooops Something went wrong:', err.message);
+        res.status(500).json({ message: err.message });
+    }
+})
+
+// products endpoints
+app.get('/products', (req, res) => {
+    try {
+        db.query('SELECT * FROM Products', (err, body) =>{
+            if(err) throw new Error(err)
+            res.status(200).json(body)
+        })
+    } catch (err) {
+        res.json(
+            {
+                message : err.message
+            }
+        )
+    }
+})
+
+app.get('/addProduct', (req, res) =>{
+    res.status(200).sendFile(path.resolve('./static/html/register.html'))
+})
+
+app.post('/addProduct', bodyParser.json(),(req, res) => {
+
+    const { name, quantity, price, url, user } = req.body;
+    const priceInt = parseFloat(price);
+//     prodName VARCHAR(15),
+// prodQuantity INT,
+// prodPrice DECIMAL(9,2),
+// prodURL TEXT,
+// userID INT,
+
+    try {
+        db.query(`
+        INSERT INTO Products (prodName, prodQuantity, prodPrice, prodURL,userID)
+        VALUES ('${name}', ${quantity} ,${price}, '${url}', ${user})
+        `, (err, body) => {
+            if (err) throw new Error(err)
+            console.log('Product registered:', req.body);
+        });
+        console.log('Product registered:', req.body);
+        res.status(201).json({ message: 'Product registered successfully' });
+    } catch (err) {
+        console.error('Error registering product:', err.message);
         res.status(500).json({ message: err.message });
     }
 })
