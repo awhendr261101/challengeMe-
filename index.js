@@ -205,6 +205,22 @@ app.patch('/Product/:id', bodyParser.json(), (req, res) => {
     }
 })
 
+app.delete('/Product/:id', (req, res) => {
+    const { id } = req.params;
+
+    const intID = parseInt(id);
+    try {
+
+        db.query(`DELETE FROM Products WHERE prodID= ${intID}`
+        );
+        console.log('User deleted:', id);
+        res.status(200).json({ message: 'User deleted successfully' });
+    } catch (err) {
+        console.error('ooops Something went wrong:', err.message);
+        res.status(500).json({ message: err.message });
+    }
+})
+
 
 app.listen(port, ()=>{
     console.log(`Server running on port ${port}`)
